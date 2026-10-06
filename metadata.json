@@ -1,0 +1,6 @@
+{
+  "name": "صحتك",
+  "description": "تطبيق صحتك - المنصة الطبية والصحية المتكاملة للإدارة والرعاية الصحية.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
