@@ -24,6 +24,7 @@ import { BloodBankView } from './components/BloodBankView';
 import { MedicineSearchView } from './components/MedicineSearchView';
 import { PrintDirectoryModal } from './components/PrintDirectoryModal';
 import { OfflineIndicator } from './components/OfflineIndicator';
+import { PushNotificationToast } from './components/PushNotificationToast';
 
 // Types & Data
 import { TabType, Doctor, Pharmacy, HealthAlert, HumanitarianCase, Coordinates, SpecialtyCategory, SystemUser, EmergencyContact, Region, SubRegion, BloodRequest, MedicineInquiry } from './types';
@@ -260,16 +261,22 @@ export default function App() {
         setPharmacies(cloudPharmacies);
       }
     });
+    const knownAlertIds = new Set<string>();
     let isInitialAlertsLoad = true;
     const unsubAlerts = subscribeToHealthAlerts((cloudAlerts) => {
       if (cloudAlerts && cloudAlerts.length > 0) {
-        if (!isInitialAlertsLoad && cloudAlerts.length > alerts.length) {
-          const newest = cloudAlerts[0];
-          sendPushNotification(newest.title, newest.content);
+        if (!isInitialAlertsLoad) {
+          const freshAlerts = cloudAlerts.filter(a => !knownAlertIds.has(a.id));
+          freshAlerts.forEach(newAlert => {
+            knownAlertIds.add(newAlert.id);
+            sendPushNotification(newAlert.title, newAlert.content);
+          });
+        } else {
+          cloudAlerts.forEach(a => knownAlertIds.add(a.id));
+          isInitialAlertsLoad = false;
         }
         setAlerts(cloudAlerts);
       }
-      isInitialAlertsLoad = false;
     });
     const unsubCases = subscribeToHumanitarianCases((cloudCases) => {
       if (cloudCases && cloudCases.length > 0) {
@@ -788,6 +795,9 @@ export default function App() {
 
         {/* PWA Offline Indicator */}
         <OfflineIndicator />
+
+        {/* Real-time Push Notification Floating Toast */}
+        <PushNotificationToast />
       </div>
     </AndroidFrame>
   );
