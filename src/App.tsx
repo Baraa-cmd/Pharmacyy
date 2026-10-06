@@ -23,6 +23,7 @@ import { AddListingModal } from './components/AddListingModal';
 import { BloodBankView } from './components/BloodBankView';
 import { MedicineSearchView } from './components/MedicineSearchView';
 import { PrintDirectoryModal } from './components/PrintDirectoryModal';
+import { OfflineIndicator } from './components/OfflineIndicator';
 
 // Types & Data
 import { TabType, Doctor, Pharmacy, HealthAlert, HumanitarianCase, Coordinates, SpecialtyCategory, SystemUser, EmergencyContact, Region, SubRegion, BloodRequest, MedicineInquiry } from './types';
@@ -37,6 +38,27 @@ import {
   getFavoritePharmacyIds,
   donateToCase
 } from './utils/storage';
+import {
+  subscribeToDoctors,
+  saveDoctorToCloud,
+  deleteDoctorFromCloud,
+  subscribeToPharmacies,
+  savePharmacyToCloud,
+  deletePharmacyFromCloud,
+  subscribeToHealthAlerts,
+  saveHealthAlertToCloud,
+  deleteHealthAlertFromCloud,
+  subscribeToHumanitarianCases,
+  saveHumanitarianCaseToCloud,
+  donateToCaseInCloud,
+  subscribeToBloodRequests,
+  saveBloodRequestToCloud,
+  updateBloodRequestInCloud,
+  subscribeToMedicineInquiries,
+  saveMedicineInquiryToCloud,
+  updateMedicineInquiryInCloud
+} from './utils/firebaseService';
+import { testFirestoreConnection } from './firebase';
 
 export default function App() {
   // Splash & Auth States
@@ -103,13 +125,7 @@ export default function App() {
     if (saved !== null) {
       try { return JSON.parse(saved); } catch (e) {}
     }
-    return [
-      { id: 'ec-1', name: 'منظومة الإسعاف السريع دير حافر', phone: '0930123456', type: 'ambulance', is24Hours: true, description: 'الاتصال المباشر لطلب سيارة إسعاف مجهزة للحالات الحرجة.' },
-      { id: 'ec-2', name: 'الدفاع المدني (الإطفاء والإنقاذ)', phone: '0217654321', type: 'civil_defense', is24Hours: true, description: 'عمليات إنقاذ عامة وإخماد حرائق بمدينة دير حافر.' },
-      { id: 'ec-3', name: 'الهلال الأحمر العربي السوري', phone: '0211234567', type: 'red_crescent', is24Hours: true, description: 'خدمات طبية إسعافية ونقل مرضى.' },
-      { id: 'ec-4', name: 'بنك الدم الإقليمي', phone: '0217778889', type: 'blood_bank', is24Hours: false, description: 'تأمين زمر الدم للحالات الإسعافية والجراحية.' },
-      { id: 'ec-5', name: 'مركز دير حافر الصحي (العيادات الشاملة)', phone: '0214445556', type: 'health_center', is24Hours: false, description: 'استقبال الحالات الإسعافية الخفيفة والمتوسطة.' },
-    ];
+    return [];
   });
 
   const [regions, setRegions] = useState<Region[]>(() => {
@@ -140,10 +156,7 @@ export default function App() {
     if (saved !== null) {
       try { return JSON.parse(saved); } catch (e) {}
     }
-    return [
-      { id: 'br-1', patientName: 'مريض بمركز الجراحة الإسعافية', bloodType: 'O-', hospital: 'مشفى دير حافر الوطني', unitsNeeded: 2, phone: '0930123456', urgency: 'critical', createdAt: 'منذ ساعتين', isFulfilled: false, notes: 'مطلوب متبرعين بشكل عاجل للغاية' },
-      { id: 'br-2', patientName: 'حالة توليد إسعافية', bloodType: 'A+', hospital: 'المشفى التخصصي', unitsNeeded: 1, phone: '0944112233', urgency: 'high', createdAt: 'منذ 5 ساعات', isFulfilled: false }
-    ];
+    return [];
   });
 
   const [medicineInquiries, setMedicineInquiries] = useState<MedicineInquiry[]>(() => {
@@ -151,9 +164,7 @@ export default function App() {
     if (saved !== null) {
       try { return JSON.parse(saved); } catch (e) {}
     }
-    return [
-      { id: 'mi-1', medicineName: 'انسولين لانتوس (Lantus Pen)', patientPhone: '0988776655', notes: 'مطلوب لمريض سكري كبار سن', createdAt: 'منذ 3 ساعات', isFound: false }
-    ];
+    return [];
   });
 
   const [showPrintModal, setShowPrintModal] = useState(false);
@@ -235,6 +246,46 @@ export default function App() {
     loadAllData();
   }, []);
 
+  // Firebase Realtime Subscriptions & Cloud Sync
+  useEffect(() => {
+    testFirestoreConnection();
+    const unsubDoctors = subscribeToDoctors((cloudDoctors) => {
+      if (cloudDoctors && cloudDoctors.length > 0) {
+        setDoctors(cloudDoctors);
+      }
+    });
+    const unsubPharmacies = subscribeToPharmacies((cloudPharmacies) => {
+      if (cloudPharmacies && cloudPharmacies.length > 0) {
+        setPharmacies(cloudPharmacies);
+      }
+    });
+    const unsubAlerts = subscribeToHealthAlerts((cloudAlerts) => {
+      if (cloudAlerts && cloudAlerts.length > 0) {
+        setAlerts(cloudAlerts);
+      }
+    });
+    const unsubCases = subscribeToHumanitarianCases((cloudCases) => {
+      if (cloudCases && cloudCases.length > 0) {
+        setHumanitarianCases(cloudCases);
+      }
+    });
+    const unsubBlood = subscribeToBloodRequests((cloudBlood) => {
+      setBloodRequests(cloudBlood);
+    });
+    const unsubInquiries = subscribeToMedicineInquiries((cloudInquiries) => {
+      setMedicineInquiries(cloudInquiries);
+    });
+
+    return () => {
+      unsubDoctors();
+      unsubPharmacies();
+      unsubAlerts();
+      unsubCases();
+      unsubBlood();
+      unsubInquiries();
+    };
+  }, []);
+
   // CRUD Handlers for Users & Entities
   const handleAddUser = (user: SystemUser) => {
     setUsers(prev => [...prev, user]);
@@ -250,43 +301,51 @@ export default function App() {
     const updated = [doc, ...doctors];
     setDoctors(updated);
     localStorage.setItem('deir_hafir_doctors', JSON.stringify(updated));
+    saveDoctorToCloud(doc);
   };
   const handleUpdateDoctor = (doc: Doctor) => {
     const updated = doctors.map(d => d.id === doc.id ? doc : d);
     setDoctors(updated);
     localStorage.setItem('deir_hafir_doctors', JSON.stringify(updated));
+    saveDoctorToCloud(doc);
   };
   const handleDeleteDoctor = (id: string) => {
     const updated = doctors.filter(d => d.id !== id);
     setDoctors(updated);
     localStorage.setItem('deir_hafir_doctors', JSON.stringify(updated));
+    deleteDoctorFromCloud(id);
   };
 
   const handleAddPharmacy = (pharm: Pharmacy) => {
     const updated = [pharm, ...pharmacies];
     setPharmacies(updated);
     localStorage.setItem('deir_hafir_pharmacies', JSON.stringify(updated));
+    savePharmacyToCloud(pharm);
   };
   const handleUpdatePharmacy = (pharm: Pharmacy) => {
     const updated = pharmacies.map(p => p.id === pharm.id ? pharm : p);
     setPharmacies(updated);
     localStorage.setItem('deir_hafir_pharmacies', JSON.stringify(updated));
+    savePharmacyToCloud(pharm);
   };
   const handleDeletePharmacy = (id: string) => {
     const updated = pharmacies.filter(p => p.id !== id);
     setPharmacies(updated);
     localStorage.setItem('deir_hafir_pharmacies', JSON.stringify(updated));
+    deletePharmacyFromCloud(id);
   };
 
   const handleAddCase = (c: HumanitarianCase) => {
     const updated = [c, ...humanitarianCases];
     setHumanitarianCases(updated);
     localStorage.setItem('deir_hafir_humanitarian_cases', JSON.stringify(updated));
+    saveHumanitarianCaseToCloud(c);
   };
   const handleUpdateCase = (c: HumanitarianCase) => {
     const updated = humanitarianCases.map(item => item.id === c.id ? c : item);
     setHumanitarianCases(updated);
     localStorage.setItem('deir_hafir_humanitarian_cases', JSON.stringify(updated));
+    saveHumanitarianCaseToCloud(c);
   };
   const handleDeleteCase = (id: string) => {
     const updated = humanitarianCases.filter(item => item.id !== id);
@@ -298,11 +357,13 @@ export default function App() {
     const updated = [a, ...alerts];
     setAlerts(updated);
     localStorage.setItem('deir_hafir_health_alerts', JSON.stringify(updated));
+    saveHealthAlertToCloud(a);
   };
   const handleDeleteAlert = (id: string) => {
     const updated = alerts.filter(item => item.id !== id);
     setAlerts(updated);
     localStorage.setItem('deir_hafir_health_alerts', JSON.stringify(updated));
+    deleteHealthAlertFromCloud(id);
   };
 
   // Handlers for Favorites
@@ -318,8 +379,12 @@ export default function App() {
 
   // Handler for Humanitarian Donation
   const handleUpdateDonation = (caseId: string, amount: number) => {
+    const targetCase = humanitarianCases.find(c => c.id === caseId);
     donateToCase(caseId, amount);
     setHumanitarianCases(getAllHumanitarianCases()); // Refresh cases
+    if (targetCase) {
+      donateToCaseInCloud(caseId, amount, targetCase);
+    }
   };
 
   // Map Navigation shortcut
@@ -491,8 +556,14 @@ export default function App() {
         return (
           <BloodBankView
             bloodRequests={bloodRequests}
-            onAddBloodRequest={(r) => setBloodRequests([r, ...bloodRequests])}
-            onFulfillBloodRequest={(id) => setBloodRequests(bloodRequests.map(x => x.id === id ? { ...x, isFulfilled: true } : x))}
+            onAddBloodRequest={(r) => {
+              setBloodRequests([r, ...bloodRequests]);
+              saveBloodRequestToCloud(r);
+            }}
+            onFulfillBloodRequest={(id) => {
+              setBloodRequests(bloodRequests.map(x => x.id === id ? { ...x, isFulfilled: true } : x));
+              updateBloodRequestInCloud(id, { isFulfilled: true });
+            }}
             emergencyContacts={emergencyContacts}
           />
         );
@@ -501,10 +572,16 @@ export default function App() {
           <MedicineSearchView
             pharmacies={pharmacies}
             medicineInquiries={medicineInquiries}
-            onAddInquiry={(iq) => setMedicineInquiries([iq, ...medicineInquiries])}
-            onResolveInquiry={(id) => setMedicineInquiries(
-              medicineInquiries.map(x => x.id === id ? { ...x, isFound: true } : x)
-            )}
+            onAddInquiry={(iq) => {
+              setMedicineInquiries([iq, ...medicineInquiries]);
+              saveMedicineInquiryToCloud(iq);
+            }}
+            onResolveInquiry={(id) => {
+              setMedicineInquiries(
+                medicineInquiries.map(x => x.id === id ? { ...x, isFound: true } : x)
+              );
+              updateMedicineInquiryInCloud(id, { isFound: true });
+            }}
           />
         );
       case 'alerts':
@@ -700,6 +777,9 @@ export default function App() {
           pharmacies={pharmacies}
           emergencyContacts={emergencyContacts}
         />
+
+        {/* PWA Offline Indicator */}
+        <OfflineIndicator />
       </div>
     </AndroidFrame>
   );

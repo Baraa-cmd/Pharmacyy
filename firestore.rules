@@ -1,0 +1,115 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global Helper functions
+    function isValidId(id) { 
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); 
+    }
+    
+    function incoming() { 
+      return request.resource.data; 
+    }
+    
+    function existing() { 
+      return resource.data; 
+    }
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Doctors Collection
+    match /doctors/{doctorId} {
+      allow read: if isValidId(doctorId);
+      allow create, update: if isValidId(doctorId) 
+        && incoming().name is string && incoming().name.size() <= 100
+        && incoming().specialty is string && incoming().specialty.size() <= 50
+        && incoming().phone is string && incoming().phone.size() <= 30
+        && incoming().address is string && incoming().address.size() <= 200;
+      allow delete: if isValidId(doctorId);
+    }
+
+    // Pharmacies Collection
+    match /pharmacies/{pharmacyId} {
+      allow read: if isValidId(pharmacyId);
+      allow create, update: if isValidId(pharmacyId)
+        && incoming().name is string && incoming().name.size() <= 100
+        && incoming().phone is string && incoming().phone.size() <= 30
+        && incoming().address is string && incoming().address.size() <= 200;
+      allow delete: if isValidId(pharmacyId);
+    }
+
+    // Health Alerts
+    match /health_alerts/{alertId} {
+      allow read: if isValidId(alertId);
+      allow create, update: if isValidId(alertId)
+        && incoming().title is string && incoming().title.size() <= 150
+        && incoming().content is string && incoming().content.size() <= 1000
+        && incoming().type is string && incoming().type.size() <= 50;
+      allow delete: if isValidId(alertId);
+    }
+
+    // Humanitarian Cases
+    match /humanitarian_cases/{caseId} {
+      allow read: if isValidId(caseId);
+      allow create: if isValidId(caseId)
+        && incoming().title is string && incoming().title.size() <= 150
+        && incoming().patientName is string && incoming().patientName.size() <= 100
+        && incoming().requiredAmount is string && incoming().requiredAmount.size() <= 50
+        && incoming().phone is string && incoming().phone.size() <= 30;
+      allow update: if isValidId(caseId)
+        && incoming().title is string && incoming().title.size() <= 150
+        && incoming().collectedAmount is string && incoming().collectedAmount.size() <= 50;
+      allow delete: if isValidId(caseId);
+    }
+
+    // Emergency Contacts
+    match /emergency_contacts/{contactId} {
+      allow read: if isValidId(contactId);
+      allow create, update: if isValidId(contactId)
+        && incoming().name is string && incoming().name.size() <= 100
+        && incoming().phone is string && incoming().phone.size() <= 30
+        && incoming().type is string && incoming().type.size() <= 50;
+      allow delete: if isValidId(contactId);
+    }
+
+    // Blood Requests
+    match /blood_requests/{requestId} {
+      allow read: if isValidId(requestId);
+      allow create: if isValidId(requestId)
+        && incoming().patientName is string && incoming().patientName.size() <= 100
+        && incoming().bloodType is string && incoming().bloodType.size() <= 10
+        && incoming().hospital is string && incoming().hospital.size() <= 150
+        && incoming().phone is string && incoming().phone.size() <= 30
+        && incoming().unitsNeeded is number;
+      allow update: if isValidId(requestId)
+        && incoming().patientName is string
+        && incoming().isFulfilled is bool;
+      allow delete: if isValidId(requestId);
+    }
+
+    // Medicine Inquiries
+    match /medicine_inquiries/{inquiryId} {
+      allow read: if isValidId(inquiryId);
+      allow create: if isValidId(inquiryId)
+        && incoming().medicineName is string && incoming().medicineName.size() <= 150
+        && incoming().patientPhone is string && incoming().patientPhone.size() <= 30;
+      allow update: if isValidId(inquiryId)
+        && incoming().medicineName is string
+        && incoming().isFound is bool;
+      allow delete: if isValidId(inquiryId);
+    }
+
+    // User Submissions
+    match /user_submissions/{submissionId} {
+      allow read: if isValidId(submissionId);
+      allow create: if isValidId(submissionId)
+        && incoming().type is string && incoming().type.size() <= 30
+        && incoming().name is string && incoming().name.size() <= 100
+        && incoming().phone is string && incoming().phone.size() <= 30;
+      allow update, delete: if isValidId(submissionId);
+    }
+  }
+}

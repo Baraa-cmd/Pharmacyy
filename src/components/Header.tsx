@@ -2,6 +2,7 @@ import React from 'react';
 import { MapPin, Bell, ShieldAlert, HeartHandshake, PlusCircle, User, Shield } from 'lucide-react';
 import { SystemUser } from '../types';
 import { AppLogo } from './AppLogo';
+import { PWAInstallButton } from './PWAInstallButton';
 
 interface HeaderProps {
   onOpenAddModal: () => void;
@@ -44,6 +45,7 @@ export const Header: React.FC<HeaderProps> = ({
           <span className="text-teal-300 text-[10px]">الخريطة النشطة</span>
         </button>
         <div className="flex items-center gap-2">
+          <PWAInstallButton variant="header" />
           {currentUser ? (
             <button
               onClick={onOpenDashboard}

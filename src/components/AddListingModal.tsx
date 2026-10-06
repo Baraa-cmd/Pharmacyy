@@ -3,6 +3,7 @@ import { X, PlusCircle, CheckCircle2, Phone, MapPin, Clock, Stethoscope, Pill } 
 import { SpecialtyCategory, Doctor, Pharmacy } from '../types';
 import { SPECIALTIES } from '../data/mockMedicalData';
 import { addCustomDoctor, addCustomPharmacy, saveSubmission } from '../utils/storage';
+import { saveDoctorToCloud, savePharmacyToCloud, saveUserSubmissionToCloud } from '../utils/firebaseService';
 
 interface AddListingModalProps {
   isOpen: boolean;
@@ -55,6 +56,7 @@ export const AddListingModal: React.FC<AddListingModalProps> = ({
         notes: ''
       };
       addCustomDoctor(newDoctor);
+      saveDoctorToCloud(newDoctor);
     } else {
       const newPharmacy: Pharmacy = {
         id: `custom-ph-${Date.now()}`,
@@ -72,9 +74,10 @@ export const AddListingModal: React.FC<AddListingModalProps> = ({
         services: ['قياس ضغط', 'حقن إبر']
       };
       addCustomPharmacy(newPharmacy);
+      savePharmacyToCloud(newPharmacy);
     }
 
-    saveSubmission({
+    const newSub = {
       id: `sub-${Date.now()}`,
       type: listingType,
       name,
@@ -84,7 +87,9 @@ export const AddListingModal: React.FC<AddListingModalProps> = ({
       address,
       workingHours,
       submittedAt: new Date().toISOString()
-    });
+    };
+    saveSubmission(newSub);
+    saveUserSubmissionToCloud(newSub);
 
     setIsSuccess(true);
     onRefreshData();

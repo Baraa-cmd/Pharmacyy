@@ -30,6 +30,7 @@ import {
 import { Doctor, Pharmacy, EmergencyContact, SpecialtyCategory, TabType, Coordinates, HealthAlert, HumanitarianCase } from '../types';
 import { SPECIALTIES } from '../data/mockMedicalData';
 import { buildWhatsAppDoctorUrl, buildWhatsAppHumanitarianDonateUrl } from '../utils/storage';
+import { PWAInstallButton } from './PWAInstallButton';
 
 interface HomeViewProps {
   doctors: Doctor[];
@@ -206,6 +207,9 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </div>
         )}
       </div>
+
+      {/* In-App PWA Install Banner */}
+      <PWAInstallButton variant="banner" />
 
       {/* 48. Health Alert Banner (Suggestion 48) */}
       {latestAlert && (

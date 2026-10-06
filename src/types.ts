@@ -175,3 +175,26 @@ export interface SubRegion {
   regionId: string;
   name: string;
 }
+
+export interface BloodRequest {
+  id: string;
+  patientName: string;
+  bloodType: string;
+  hospital: string;
+  unitsNeeded: number;
+  phone: string;
+  urgency: 'critical' | 'high' | 'normal';
+  createdAt: string;
+  isFulfilled: boolean;
+  notes?: string;
+}
+
+export interface MedicineInquiry {
+  id: string;
+  medicineName: string;
+  patientPhone: string;
+  notes?: string;
+  createdAt: string;
+  isFound: boolean;
+}
+

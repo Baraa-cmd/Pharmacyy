@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d9488" />
+      <stop offset="100%" stop-color="#0f766e" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-opacity="0.25" />
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)" />
+  <g filter="url(#shadow)">
+    <!-- Medical Cross -->
+    <path d="M 216 128 C 216 121.4 221.4 116 228 116 L 284 116 C 290.6 116 296 121.4 296 128 L 296 216 L 384 216 C 390.6 216 396 221.4 396 228 L 396 284 C 396 290.6 390.6 296 384 296 L 296 296 L 296 384 C 296 390.6 290.6 396 284 396 L 228 396 C 221.4 396 216 390.6 216 384 L 216 296 L 128 296 C 121.4 296 116 290.6 116 284 L 116 228 C 116 221.4 121.4 216 128 216 L 216 216 Z" fill="#ffffff" />
+    <!-- Heart Pulse Beat -->
+    <path d="M 180 256 L 216 256 L 236 210 L 264 302 L 286 240 L 300 256 L 332 256" stroke="#0d9488" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  </g>
+</svg>

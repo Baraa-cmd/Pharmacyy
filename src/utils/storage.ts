@@ -201,6 +201,28 @@ export function donateToCase(id: string, amount: number): HumanitarianCase[] {
   }
 }
 
+export function resetAllData(): void {
+  try {
+    localStorage.removeItem('deir_hafir_doctors');
+    localStorage.removeItem('deir_hafir_pharmacies');
+    localStorage.removeItem('deir_hafir_health_alerts');
+    localStorage.removeItem('deir_hafir_humanitarian_cases');
+    localStorage.removeItem('deir_hafir_blood_requests');
+    localStorage.removeItem('deir_hafir_medicine_inquiries');
+    localStorage.removeItem(SUBMISSIONS_KEY);
+    localStorage.removeItem(FAVORITES_DOCTORS_KEY);
+    localStorage.removeItem(FAVORITES_PHARMACIES_KEY);
+    localStorage.setItem('deir_hafir_doctors', JSON.stringify([]));
+    localStorage.setItem('deir_hafir_pharmacies', JSON.stringify([]));
+    localStorage.setItem('deir_hafir_health_alerts', JSON.stringify([]));
+    localStorage.setItem('deir_hafir_humanitarian_cases', JSON.stringify([]));
+    localStorage.setItem('deir_hafir_blood_requests', JSON.stringify([]));
+    localStorage.setItem('deir_hafir_medicine_inquiries', JSON.stringify([]));
+  } catch (e) {
+    console.error(e);
+  }
+}
+
 // WhatsApp URL generator
 export function buildWhatsAppDoctorUrl(phone: string, doctorName: string): string {
   const cleanPhone = phone.replace(/[^0-9]/g, '');

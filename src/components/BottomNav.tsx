@@ -8,8 +8,20 @@ interface BottomNavProps {
   favoritesCount: number;
 }
 
+interface NavTabItem {
+  id: TabType;
+  label: string;
+  icon: any;
+  isDutyBadge?: boolean;
+  isMap?: boolean;
+  isEmergency?: boolean;
+  isBloodBank?: boolean;
+  hasBadge?: boolean;
+  badgeCount?: number;
+}
+
 export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange, favoritesCount }) => {
-  const tabs = [
+  const tabs: NavTabItem[] = [
     { id: 'home' as TabType, label: 'الرئيسية', icon: Home },
     { id: 'doctors' as TabType, label: 'الأطباء', icon: Stethoscope },
     { id: 'pharmacies' as TabType, label: 'الصيدليات', icon: Pill, isDutyBadge: true },

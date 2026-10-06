@@ -1,0 +1,179 @@
+{
+  "entities": {
+    "Doctor": {
+      "title": "Doctor",
+      "description": "Doctor profile in the medical directory",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string", "maxLength": 100 },
+        "title": { "type": "string", "maxLength": 150 },
+        "specialty": { "type": "string", "maxLength": 50 },
+        "specialtyName": { "type": "string", "maxLength": 100 },
+        "phone": { "type": "string", "maxLength": 30 },
+        "whatsapp": { "type": "string", "maxLength": 30 },
+        "address": { "type": "string", "maxLength": 200 },
+        "landmark": { "type": "string", "maxLength": 200 },
+        "workingDays": { "type": "string", "maxLength": 100 },
+        "workingHours": { "type": "string", "maxLength": 100 },
+        "isAvailableNow": { "type": "boolean" },
+        "notes": { "type": "string", "maxLength": 500 },
+        "experienceYears": { "type": "number" },
+        "consultationFee": { "type": "string", "maxLength": 50 },
+        "rating": { "type": "number" },
+        "reviewsCount": { "type": "number" },
+        "isVerified": { "type": "boolean" }
+      },
+      "required": ["id", "name", "specialty", "phone", "address"]
+    },
+    "Pharmacy": {
+      "title": "Pharmacy",
+      "description": "Pharmacy profile in the directory",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string", "maxLength": 100 },
+        "pharmacistName": { "type": "string", "maxLength": 100 },
+        "phone": { "type": "string", "maxLength": 30 },
+        "whatsapp": { "type": "string", "maxLength": 30 },
+        "address": { "type": "string", "maxLength": 200 },
+        "landmark": { "type": "string", "maxLength": 200 },
+        "isDutyToday": { "type": "boolean" },
+        "dutyType": { "type": "string", "maxLength": 20 },
+        "workingHours": { "type": "string", "maxLength": 100 },
+        "isOpenNow": { "type": "boolean" },
+        "notes": { "type": "string", "maxLength": 500 }
+      },
+      "required": ["id", "name", "phone", "address"]
+    },
+    "HealthAlert": {
+      "title": "HealthAlert",
+      "description": "Public health notices and vaccine campaign announcements",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string", "maxLength": 150 },
+        "content": { "type": "string", "maxLength": 1000 },
+        "type": { "type": "string", "maxLength": 50 },
+        "date": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "title", "content", "type", "date"]
+    },
+    "HumanitarianCase": {
+      "title": "HumanitarianCase",
+      "description": "Medical urgent charity cases and donations",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string", "maxLength": 150 },
+        "patientName": { "type": "string", "maxLength": 100 },
+        "age": { "type": "string", "maxLength": 20 },
+        "condition": { "type": "string", "maxLength": 250 },
+        "requiredAmount": { "type": "string", "maxLength": 50 },
+        "collectedAmount": { "type": "string", "maxLength": 50 },
+        "hospital": { "type": "string", "maxLength": 150 },
+        "phone": { "type": "string", "maxLength": 30 },
+        "whatsapp": { "type": "string", "maxLength": 30 },
+        "isCompleted": { "type": "boolean" }
+      },
+      "required": ["id", "title", "patientName", "requiredAmount", "collectedAmount", "phone"]
+    },
+    "EmergencyContact": {
+      "title": "EmergencyContact",
+      "description": "Emergency services and hotlines",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string", "maxLength": 100 },
+        "description": { "type": "string", "maxLength": 250 },
+        "phone": { "type": "string", "maxLength": 30 },
+        "type": { "type": "string", "maxLength": 50 },
+        "is24Hours": { "type": "boolean" }
+      },
+      "required": ["id", "name", "phone", "type"]
+    },
+    "BloodRequest": {
+      "title": "BloodRequest",
+      "description": "Urgent blood donation requests",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "patientName": { "type": "string", "maxLength": 100 },
+        "bloodType": { "type": "string", "maxLength": 10 },
+        "hospital": { "type": "string", "maxLength": 150 },
+        "unitsNeeded": { "type": "number" },
+        "phone": { "type": "string", "maxLength": 30 },
+        "urgency": { "type": "string", "maxLength": 20 },
+        "createdAt": { "type": "string", "maxLength": 50 },
+        "isFulfilled": { "type": "boolean" },
+        "notes": { "type": "string", "maxLength": 500 }
+      },
+      "required": ["id", "patientName", "bloodType", "hospital", "unitsNeeded", "phone", "urgency"]
+    },
+    "MedicineInquiry": {
+      "title": "MedicineInquiry",
+      "description": "Inquiry looking for scarce or missing medicines",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "medicineName": { "type": "string", "maxLength": 150 },
+        "patientPhone": { "type": "string", "maxLength": 30 },
+        "notes": { "type": "string", "maxLength": 500 },
+        "createdAt": { "type": "string", "maxLength": 50 },
+        "isFound": { "type": "boolean" }
+      },
+      "required": ["id", "medicineName", "patientPhone"]
+    },
+    "UserSubmission": {
+      "title": "UserSubmission",
+      "description": "New provider submissions awaiting review",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string", "maxLength": 30 },
+        "name": { "type": "string", "maxLength": 100 },
+        "categoryOrSpecialty": { "type": "string", "maxLength": 100 },
+        "phone": { "type": "string", "maxLength": 30 },
+        "whatsapp": { "type": "string", "maxLength": 30 },
+        "address": { "type": "string", "maxLength": 200 },
+        "workingHours": { "type": "string", "maxLength": 100 },
+        "submittedAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "type", "name", "phone", "address"]
+    }
+  },
+  "firestore": {
+    "/doctors/{doctorId}": {
+      "schema": "Doctor",
+      "description": "Doctors in directory"
+    },
+    "/pharmacies/{pharmacyId}": {
+      "schema": "Pharmacy",
+      "description": "Pharmacies and on-duty rosters"
+    },
+    "/health_alerts/{alertId}": {
+      "schema": "HealthAlert",
+      "description": "Health announcements and vaccine notifications"
+    },
+    "/humanitarian_cases/{caseId}": {
+      "schema": "HumanitarianCase",
+      "description": "Medical cases needing financial help"
+    },
+    "/emergency_contacts/{contactId}": {
+      "schema": "EmergencyContact",
+      "description": "Emergency contacts"
+    },
+    "/blood_requests/{requestId}": {
+      "schema": "BloodRequest",
+      "description": "Urgent blood requests"
+    },
+    "/medicine_inquiries/{inquiryId}": {
+      "schema": "MedicineInquiry",
+      "description": "Medicines inquiries by citizens"
+    },
+    "/user_submissions/{submissionId}": {
+      "schema": "UserSubmission",
+      "description": "User submissions"
+    }
+  }
+}
