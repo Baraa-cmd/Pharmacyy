@@ -1,24 +1,159 @@
-import React from 'react';
-import { Bell, AlertTriangle, ShieldCheck, Info, HeartPulse } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Bell, AlertTriangle, ShieldCheck, Info, HeartPulse, Send, CheckCircle2, Volume2, Sparkles } from 'lucide-react';
 import { HealthAlert } from '../types';
+import { requestNotificationPermission, getNotificationPermissionState, sendPushNotification } from '../utils/notificationService';
 
 interface AlertsViewProps {
   alerts: HealthAlert[];
+  onAddAlert?: (alert: HealthAlert) => void;
 }
 
-export const AlertsView: React.FC<AlertsViewProps> = ({ alerts }) => {
+export const AlertsView: React.FC<AlertsViewProps> = ({ alerts, onAddAlert }) => {
+  const [permission, setPermission] = useState<NotificationPermission>('default');
+  const [testTitle, setTestTitle] = useState('حملة لقاح وطنية عاجلة 💉');
+  const [testBody, setTestBody] = useState('انطلاق حملة اللقاح الشاملة في مستوصف دير حافر الخيري اليوم.');
+  const [isTestSuccess, setIsTestSuccess] = useState(false);
+  const [showTestPanel, setShowTestPanel] = useState(false);
+
+  useEffect(() => {
+    setPermission(getNotificationPermissionState());
+  }, []);
+
+  const handleRequestPermission = async () => {
+    const res = await requestNotificationPermission();
+    setPermission(res);
+  };
+
+  const handleSendTestPush = async () => {
+    if (permission !== 'granted') {
+      const res = await requestNotificationPermission();
+      setPermission(res);
+    }
+    await sendPushNotification(testTitle, testBody);
+    setIsTestSuccess(true);
+    setTimeout(() => setIsTestSuccess(false), 3000);
+  };
+
+  const handlePublishToFirebase = () => {
+    if (onAddAlert) {
+      const newAlert: HealthAlert = {
+        id: `alert-${Date.now()}`,
+        title: testTitle,
+        content: testBody,
+        type: 'vaccine',
+        date: 'الآن'
+      };
+      onAddAlert(newAlert);
+      handleSendTestPush();
+    }
+  };
+
   return (
-    <div className="space-y-4 pb-24 px-3.5 pt-3">
+    <div className="space-y-4 pb-24 px-3.5 pt-3 text-right" dir="rtl">
       {/* Title */}
-      <div>
-        <h2 className="text-base font-black text-slate-900 flex items-center gap-1.5">
-          <Bell className="w-5 h-5 text-amber-500 fill-amber-500" />
-          <span>مركز الإشعارات والتنبيهات الصحية</span>
-        </h2>
-        <p className="text-[11px] text-slate-500">
-          آخر التحذيرات الطبية، التوجيهات الوقائية، وحملات اللقاح المعتمدة بدير حافر
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-base font-black text-slate-900 flex items-center gap-1.5">
+            <Bell className="w-5 h-5 text-amber-500 fill-amber-500" />
+            <span>مركز الإشعارات والتنبيهات الصحية</span>
+          </h2>
+          <p className="text-[11px] text-slate-500">
+            آخر التحذيرات الطبية، التوجيهات الوقائية، وحملات اللقاح المعتمدة بدير حافر
+          </p>
+        </div>
+        <button
+          onClick={() => setShowTestPanel(!showTestPanel)}
+          className="flex items-center gap-1 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs rounded-xl shadow-xs transition active:scale-95 shrink-0"
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>{showTestPanel ? 'إخفاء الاختبار' : 'تجربة إشعار'}</span>
+        </button>
       </div>
+
+      {/* Interactive Notification Testing Panel */}
+      {showTestPanel && (
+        <div className="bg-gradient-to-br from-amber-50 via-white to-teal-50/40 rounded-3xl p-4 border border-amber-200/80 shadow-md space-y-3 animate-in fade-in duration-200">
+          <div className="flex items-center justify-between pb-2 border-b border-amber-100">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-bold">
+                <Bell className="w-4 h-4 fill-slate-950" />
+              </div>
+              <div>
+                <h3 className="font-extrabold text-slate-900 text-xs">لوحة تجربة إرسال الإشعارات</h3>
+                <p className="text-[10px] text-slate-500">اختبر وصول الإشعار وصوت التنبيه إلى هاتفك وجهازك فوراً</p>
+              </div>
+            </div>
+            
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+              permission === 'granted'
+                ? 'bg-emerald-100 text-emerald-800'
+                : permission === 'denied'
+                ? 'bg-rose-100 text-rose-800'
+                : 'bg-amber-100 text-amber-800'
+            }`}>
+              {permission === 'granted' ? '✅ الإشعارات مفعلة' : permission === 'denied' ? '❌ محظورة بالمتصفح' : '⚠️ بانتظار الإذن'}
+            </span>
+          </div>
+
+          <div className="space-y-2">
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 mb-0.5">عنوان الإشعار التجريبي:</label>
+              <input
+                type="text"
+                value={testTitle}
+                onChange={(e) => setTestTitle(e.target.value)}
+                className="w-full text-xs p-2 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 mb-0.5">نص الإشعار:</label>
+              <textarea
+                rows={2}
+                value={testBody}
+                onChange={(e) => setTestBody(e.target.value)}
+                className="w-full text-xs p-2 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
+              />
+            </div>
+          </div>
+
+          {isTestSuccess && (
+            <div className="p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-1.5 animate-in fade-in">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>تم إطلاق الإشعار بنجاح وصوت النغمة الآن! 🔔</span>
+            </div>
+          )}
+
+          <div className="flex items-center gap-2 pt-1">
+            {permission !== 'granted' && (
+              <button
+                onClick={handleRequestPermission}
+                className="flex-1 py-2 px-3 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-xl transition shadow-xs"
+              >
+                طلب إذن التنبيهات
+              </button>
+            )}
+
+            <button
+              onClick={handleSendTestPush}
+              className="flex-1 py-2 px-3 bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition shadow-xs active:scale-95"
+            >
+              <Volume2 className="w-3.5 h-3.5" />
+              <span>إرسال إشعار تجريبي للجهاز</span>
+            </button>
+
+            {onAddAlert && (
+              <button
+                onClick={handlePublishToFirebase}
+                className="py-2 px-3 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition shadow-xs active:scale-95"
+                title="نشر الإشعار في Firebase لجميع الأجهزة"
+              >
+                <Send className="w-3.5 h-3.5" />
+                <span>نشر للجميع في السحابة</span>
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Lists of Alerts */}
       <div className="space-y-3.5">
@@ -108,3 +243,4 @@ export const AlertsView: React.FC<AlertsViewProps> = ({ alerts }) => {
     </div>
   );
 };
+

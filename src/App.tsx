@@ -59,6 +59,7 @@ import {
   updateMedicineInquiryInCloud
 } from './utils/firebaseService';
 import { testFirestoreConnection } from './firebase';
+import { sendPushNotification } from './utils/notificationService';
 
 export default function App() {
   // Splash & Auth States
@@ -259,10 +260,16 @@ export default function App() {
         setPharmacies(cloudPharmacies);
       }
     });
+    let isInitialAlertsLoad = true;
     const unsubAlerts = subscribeToHealthAlerts((cloudAlerts) => {
       if (cloudAlerts && cloudAlerts.length > 0) {
+        if (!isInitialAlertsLoad && cloudAlerts.length > alerts.length) {
+          const newest = cloudAlerts[0];
+          sendPushNotification(newest.title, newest.content);
+        }
         setAlerts(cloudAlerts);
       }
+      isInitialAlertsLoad = false;
     });
     const unsubCases = subscribeToHumanitarianCases((cloudCases) => {
       if (cloudCases && cloudCases.length > 0) {
@@ -358,6 +365,7 @@ export default function App() {
     setAlerts(updated);
     localStorage.setItem('deir_hafir_health_alerts', JSON.stringify(updated));
     saveHealthAlertToCloud(a);
+    sendPushNotification(a.title, a.content);
   };
   const handleDeleteAlert = (id: string) => {
     const updated = alerts.filter(item => item.id !== id);
@@ -585,7 +593,7 @@ export default function App() {
           />
         );
       case 'alerts':
-        return <AlertsView alerts={alerts} />;
+        return <AlertsView alerts={alerts} onAddAlert={handleAddAlert} />;
       case 'humanitarian':
         return (
           <HumanitarianView
